@@ -60,4 +60,18 @@ contract MarketplaceNFTMinter is ERC721Enumerable, ERC721URIStorage, Ownable {
     function withdraw() public payable onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
+
+    function setCost(uint256 newCost) public onlyOwner {
+        cost = newCost;
+    }
+
+    function setBaseExtension(
+        string memory _newBaseExtension
+    ) public onlyOwner {
+        baseExtension = _newBaseExtension;
+    }
+
+    function pause(bool _state) public onlyOwner {
+        paused = _state;
+    }
 }
