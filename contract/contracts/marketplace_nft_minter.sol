@@ -83,4 +83,10 @@ contract MarketplaceNFTMinter is ERC721Enumerable, ERC721URIStorage, Ownable {
     ) internal override(ERC721, ERC721Enumerable) {
         super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
     }
+
+    function _burn(
+        uint256 tokenId
+    ) internal override(ERC721, ERC721URIStorage) {
+        super._burn(tokenId);
+    }
 }
