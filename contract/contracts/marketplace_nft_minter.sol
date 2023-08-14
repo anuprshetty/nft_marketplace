@@ -89,4 +89,15 @@ contract MarketplaceNFTMinter is ERC721Enumerable, ERC721URIStorage, Ownable {
     ) internal override(ERC721, ERC721URIStorage) {
         super._burn(tokenId);
     }
+
+    function walletOfOwner(
+        address _owner
+    ) public view returns (uint256[] memory) {
+        uint256 ownerTokenCount = balanceOf(_owner);
+        uint256[] memory tokenIds = new uint256[](ownerTokenCount);
+        for (uint256 i; i < ownerTokenCount; i++) {
+            tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
+        }
+        return tokenIds;
+    }
 }
