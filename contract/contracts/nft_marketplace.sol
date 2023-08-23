@@ -10,4 +10,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFTMarketplace is IERC721Receiver, ReentrancyGuard, Ownable {
     uint256 public nftListingFee = 0.0025 ether;
+
+    struct NFTCollection {
+        string name;
+        address nftMinterAddress;
+    }
+
+    NFTCollection[] public nftCollections;
 }
