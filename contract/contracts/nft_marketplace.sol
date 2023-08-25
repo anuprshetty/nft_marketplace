@@ -17,4 +17,15 @@ contract NFTMarketplace is IERC721Receiver, ReentrancyGuard, Ownable {
     }
 
     NFTCollection[] public nftCollections;
+
+    struct MarketplaceNFT {
+        bool nftOnMarketplace;
+        uint256 nftCollectionIndex;
+        uint256 tokenId;
+        address payable seller;
+        uint256 sellPrice;
+    }
+
+    mapping(uint256 nftCollectionIndex => mapping(uint256 tokenId => MarketplaceNFT marketplaceNFT))
+        public marketplaceNFTs;
 }
