@@ -28,4 +28,25 @@ contract NFTMarketplace is IERC721Receiver, ReentrancyGuard, Ownable {
 
     mapping(uint256 nftCollectionIndex => mapping(uint256 tokenId => MarketplaceNFT marketplaceNFT))
         public marketplaceNFTs;
+
+    event NFTsListed(
+        uint256 nftCollectionIndex,
+        uint256[] tokenIds,
+        address seller,
+        uint256[] sellPrices
+    );
+
+    event NFTsUnlisted(
+        uint256 nftCollectionIndex,
+        uint256[] tokenIds,
+        address seller
+    );
+
+    event NFTBought(
+        uint256 nftCollectionIndex,
+        uint256 tokenId,
+        address seller,
+        uint256 sellPrice,
+        address buyer
+    );
 }
