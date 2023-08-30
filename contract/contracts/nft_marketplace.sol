@@ -53,4 +53,17 @@ contract NFTMarketplace is IERC721Receiver, ReentrancyGuard, Ownable {
     function setNFTListingFee(uint256 newNFTListingFee) external onlyOwner {
         nftListingFee = newNFTListingFee;
     }
+
+    function addNFTCollection(
+        string calldata _name,
+        address _nftMinterAddress
+    ) external onlyOwner {
+        require(
+            bytes(_name).length > 0,
+            "nft collection name should not be empty"
+        );
+        nftCollections.push(
+            NFTCollection({name: _name, nftMinterAddress: _nftMinterAddress})
+        );
+    }
 }
