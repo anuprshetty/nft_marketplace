@@ -99,4 +99,12 @@ contract NFTMarketplace is IERC721Receiver, ReentrancyGuard, Ownable {
         ];
         nftCollections.pop();
     }
+
+    function getNFTCollections()
+        external
+        view
+        returns (NFTCollection[] memory)
+    {
+        return nftCollections;
+    }
 }
