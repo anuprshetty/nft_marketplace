@@ -107,4 +107,66 @@ contract NFTMarketplace is IERC721Receiver, ReentrancyGuard, Ownable {
     {
         return nftCollections;
     }
+
+    function listNFTs(
+        uint256 nftCollectionIndex,
+        uint256[] calldata tokenIds,
+        uint256[] calldata sellPrices
+    ) external payable nonReentrant {
+        require(
+            nftCollectionIndex < nftCollections.length,
+            "invalid nftCollectionIndex"
+        );
+
+        NFTCollection storage nftCollection = nftCollections[
+            nftCollectionIndex
+        ];
+
+        require(tokenIds.length > 0, "tokenIds must contain atleast 1 tokenId");
+
+        require(
+            tokenIds.length == sellPrices.length,
+            "mismatch in tokenIds and sellPrices"
+        );
+
+        require(
+            msg.value == (nftListingFee * tokenIds.length),
+            "insufficient nftListingFee"
+        );
+
+        uint256 tokenId;
+        uint256 sellPrice;
+        for (uint i = 0; i < tokenIds.length; i++) {
+            tokenId = tokenIds[i];
+            sellPrice = sellPrices[i];
+
+            require(
+                IERC721(nftCollection.nftMinterAddress).ownerOf(tokenId) ==
+                    msg.sender,
+                "token doesn't belong to the user"
+            );
+            require(
+                marketplaceNFTs[nftCollectionIndex][tokenId].nftOnMarketplace ==
+                    false,
+                "token already listed on marketplace"
+            );
+            require(sellPrice > 0, "sellPrice must be greater than 0");
+
+            IERC721(nftCollection.nftMinterAddress).transferFrom(
+                msg.sender,
+                address(this),
+                tokenId
+            );
+
+            marketplaceNFTs[nftCollectionIndex][tokenId] = MarketplaceNFT({
+                nftOnMarketplace: true,
+                nftCollectionIndex: nftCollectionIndex,
+                tokenId: tokenId,
+                seller: payable(msg.sender),
+                sellPrice: sellPrice
+            });
+        }
+
+        emit NFTsListed(nftCollectionIndex, tokenIds, msg.sender, sellPrices);
+    }
 }
