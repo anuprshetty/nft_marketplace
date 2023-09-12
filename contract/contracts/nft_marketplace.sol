@@ -212,4 +212,47 @@ contract NFTMarketplace is IERC721Receiver, ReentrancyGuard, Ownable {
 
         emit NFTsUnlisted(nftCollectionIndex, tokenIds, msg.sender);
     }
+
+    function buyNFT(
+        uint256 nftCollectionIndex,
+        uint256 tokenId
+    ) external payable nonReentrant {
+        require(
+            nftCollectionIndex < nftCollections.length,
+            "invalid nftCollectionIndex"
+        );
+
+        NFTCollection storage nftCollection = nftCollections[
+            nftCollectionIndex
+        ];
+
+        require(
+            marketplaceNFTs[nftCollectionIndex][tokenId].nftOnMarketplace ==
+                true,
+            "token not listed on marketplace"
+        );
+
+        require(
+            msg.value == marketplaceNFTs[nftCollectionIndex][tokenId].sellPrice,
+            "amount not equal to sellPrice"
+        );
+
+        marketplaceNFTs[nftCollectionIndex][tokenId].seller.transfer(msg.value);
+
+        IERC721(nftCollection.nftMinterAddress).transferFrom(
+            address(this),
+            msg.sender,
+            tokenId
+        );
+
+        delete marketplaceNFTs[nftCollectionIndex][tokenId];
+
+        emit NFTBought(
+            marketplaceNFTs[nftCollectionIndex][tokenId].nftCollectionIndex,
+            marketplaceNFTs[nftCollectionIndex][tokenId].tokenId,
+            marketplaceNFTs[nftCollectionIndex][tokenId].seller,
+            marketplaceNFTs[nftCollectionIndex][tokenId].sellPrice,
+            msg.sender
+        );
+    }
 }
