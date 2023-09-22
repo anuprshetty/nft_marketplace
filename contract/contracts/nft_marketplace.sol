@@ -387,4 +387,8 @@ contract NFTMarketplace is IERC721Receiver, ReentrancyGuard, Ownable {
         );
         return IERC721Receiver.onERC721Received.selector;
     }
+
+    function withdraw() public payable onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
+    }
 }
