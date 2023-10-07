@@ -1,0 +1,16 @@
+version: "3" # version of docker compose
+
+services:
+  nft-marketplace-dapp:
+    build:
+      context: ../
+      dockerfile: ./docker_files/Dockerfile
+      args:
+        - REACT_APP_IPFS_GATEWAY=http://127.0.0.1:4325/
+        - REACT_APP_EVMCHAIN_HTTP_PROVIDER_URL_READONLY=http://127.0.0.1:8545/
+    image: nft-marketplace-dapp-image:latest
+    container_name: nft-marketplace-dapp-container
+    hostname: nft-marketplace-dapp
+    restart: "no"
+    ports:
+      - "8080:80"
