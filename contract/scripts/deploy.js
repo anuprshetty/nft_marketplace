@@ -209,7 +209,17 @@ class NFTMinter extends BaseContract {
   }
 }
 
+class MarketplaceNFTMinter extends BaseContract {
+  constructor(contract_instance_name, output_nft_info) {
+    super("MarketplaceNFTMinter", contract_instance_name);
 
+    this.output_nft_info = output_nft_info;
+    this.contract_constructor_args = [
+      output_nft_info.nft_collection_name,
+      output_nft_info.symbol,
+    ];
+  }
+}
 
 
 
