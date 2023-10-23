@@ -221,7 +221,28 @@ class MarketplaceNFTMinter extends BaseContract {
   }
 }
 
+class NFTMarketplace extends BaseContract {
+  constructor(contract_instance_name) {
+    super("NFTMarketplace", contract_instance_name);
+  }
 
+  async addNFTCollection(nft_collection_index, name, nftMinterAddress) {
+    await (await this.contract.addNFTCollection(name, nftMinterAddress)).wait();
+
+    const nftCollection = await this.contract.nftCollections(
+      nft_collection_index
+    );
+
+    if (
+      nftCollection.name !== name ||
+      nftCollection.nftMinterAddress !== nftMinterAddress
+    ) {
+      throw new Error(
+        `Error in ${this.addNFTCollection.name}() method while setting up ${this.contract_name} contract - ${this.contract_instance_name} contract_instance`
+      );
+    }
+  }
+}
 
 
 
