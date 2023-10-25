@@ -244,7 +244,162 @@ class NFTMarketplace extends BaseContract {
   }
 }
 
+class BaseDeploy {
+  constructor() {
+    this.tokens = [];
+    this.nft_collections = [];
+    this.marketplace_nft_collections = [];
+    this.nft_marketplaces = [];
+  }
 
+  async deploy() {
+    const token_alp = new Token("token_alpha", {
+      name: "Token Alpha",
+      symbol: "TKN-ALP",
+      maxSupply: 1000000,
+    });
+
+    this.tokens = [token_alp];
+
+    for (const token of this.tokens) {
+      await token.deployContract();
+    }
+
+    const hash_wallet_accounts = JSON.parse(
+      fs.readFileSync(
+        path.join(__dirname, "..", "hash_wallet_accounts.json"),
+        "utf8"
+      )
+    );
+
+    for (const token of this.tokens) {
+      for (const account of hash_wallet_accounts) {
+        await token.mint(account.address, 10000);
+      }
+    }
+
+    const output_nfts_info = await this.get_output_nfts_info();
+
+    this.nft_collections = [];
+    var begin = 0;
+    const end = 0;
+    for (let output_nft_info in output_nfts_info) {
+      if (begin > end) {
+        break;
+      }
+
+      output_nft_info = output_nfts_info[output_nft_info];
+
+      const nft_collection = new NFTMinter(
+        output_nft_info.nft_collection_id,
+        output_nft_info
+      );
+      this.nft_collections.push(nft_collection);
+
+      begin += 1;
+    }
+
+    for (const nft_collection of this.nft_collections) {
+      await nft_collection.deployContract();
+    }
+
+    for (const [c_index, nft_collection] of this.nft_collections.entries()) {
+      for (const [t_index, token] of this.tokens.entries()) {
+        const cost = parseInt((c_index + 1) * (t_index + 1));
+        await nft_collection.addCustomPaymentCurrency(
+          t_index,
+          token.contract_instance_name,
+          token.symbol,
+          token.contract_address,
+          cost
+        );
+      }
+    }
+
+    const marketplace_nft_collection = new MarketplaceNFTMinter(
+      "collection_marketplace",
+      {
+        nft_collection_id: "collection_marketplace",
+        nft_collection_name: "NFT Collection Marketplace",
+        name: "Collection Marketplace",
+        symbol: "COL-MRK",
+      }
+    );
+    this.marketplace_nft_collections = [marketplace_nft_collection];
+    await marketplace_nft_collection.deployContract();
+
+    const nft_marketplace = new NFTMarketplace("nft_marketplace");
+    this.nft_marketplaces = [nft_marketplace];
+    await nft_marketplace.deployContract();
+
+    await nft_marketplace.addNFTCollection(
+      0,
+      marketplace_nft_collection.contract_instance_name,
+      marketplace_nft_collection.contract_address
+    );
+
+    for (const [
+      nft_collection_index,
+      nft_collection,
+    ] of this.nft_collections.entries()) {
+      await nft_marketplace.addNFTCollection(
+        nft_collection_index + 1,
+        nft_collection.contract_instance_name,
+        nft_collection.contract_address
+      );
+    }
+
+    const dapp_contracts_info = [
+      {
+        contractName: this.tokens[0].contract_name,
+        contractInstances: this.tokens.map((token) => ({
+          name: token.contract_instance_name,
+          address: token.contract_address,
+        })),
+      },
+      {
+        contractName: this.nft_collections[0].contract_name,
+        contractInstances: this.nft_collections.map((nft_collection) => ({
+          name: nft_collection.contract_instance_name,
+          address: nft_collection.contract_address,
+          nftCollection: nft_collection.output_nft_info.name,
+        })),
+      },
+      {
+        contractName: this.marketplace_nft_collections[0].contract_name,
+        contractInstances: this.marketplace_nft_collections.map(
+          (marktplace_nft_collection) => ({
+            name: marktplace_nft_collection.contract_instance_name,
+            address: marktplace_nft_collection.contract_address,
+            nftCollection: marktplace_nft_collection.output_nft_info.name,
+          })
+        ),
+      },
+      {
+        contractName: this.nft_marketplaces[0].contract_name,
+        contractInstances: this.nft_marketplaces.map((nft_marketplace) => ({
+          name: nft_marketplace.contract_instance_name,
+          address: nft_marketplace.contract_address,
+        })),
+      },
+    ];
+
+    for (const dapp_contract_info of dapp_contracts_info) {
+      await Utils.generate_dapp_contract_info(
+        dapp_contract_info.contractName,
+        dapp_contract_info.contractInstances
+      );
+    }
+  }
+
+  async setBaseURI() {
+    for (const nft_collection of this.nft_collections) {
+      await nft_collection.setBaseURI(
+        nft_collection.output_nft_info.nft_metadata_folder_cid
+      );
+    }
+  }
+}
 
 
 
